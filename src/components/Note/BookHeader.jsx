@@ -10,9 +10,12 @@ export default function BookHeader({ book, onUpdate }) {
   const [localBook, setLocalBook] = useState(book)
 
   const handleChange = (field, value) => {
-    const updated = { ...localBook, [field]: value }
-    setLocalBook(updated)
-    onUpdate?.({ [field]: value })
+    const updates = { [field]: value }
+    if (field === 'status' && value === 'done' && !localBook.end_date) {
+      updates.end_date = new Date().toISOString().slice(0, 10)
+    }
+    setLocalBook(prev => ({ ...prev, ...updates }))
+    onUpdate?.(updates)
   }
 
   return (

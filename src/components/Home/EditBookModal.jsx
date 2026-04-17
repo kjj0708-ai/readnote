@@ -61,7 +61,11 @@ export default function EditBookModal({ book, onSave, onDelete, onClose }) {
             <label className="block text-xs font-noto mb-2" style={{ color: 'rgba(200,160,80,0.6)' }}>독서 상태</label>
             <div className="grid grid-cols-3 gap-2">
               {STATUS_OPTIONS.map(opt => (
-                <button key={opt.value} onClick={() => setForm(f => ({ ...f, status: opt.value }))}
+                <button key={opt.value} onClick={() => setForm(f => ({
+                  ...f,
+                  status: opt.value,
+                  end_date: opt.value === 'done' && !f.end_date ? new Date().toISOString().slice(0, 10) : f.end_date,
+                }))}
                   className="py-2 px-1 rounded-lg text-xs font-noto transition-all"
                   style={form.status === opt.value ? {
                     background: 'linear-gradient(135deg, #C4915A, #A0673A)',
