@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAladinSearch } from '../../hooks/useAladinSearch'
 import { useAuth } from '../../hooks/useAuth'
-import { parseToc, generateDefaultChapters } from '../../utils/tocParser'
+import { parseToc } from '../../utils/tocParser'
 import { supabase } from '../../lib/supabase'
 import SearchResult from './SearchResult'
 
@@ -73,23 +73,21 @@ export default function SearchModal({ onClose, onBookAdded, addBook }) {
 
       if (bookError) throw new Error(bookError.message || '도서 추가 실패')
 
-      // 챕터 생성: TOC가 있으면 파싱, 없으면 기본 5챕터
-      if (newBook?.id) {
-        const parsedChapters = toc ? parseToc(toc) : []
-        const chaptersToSave = parsedChapters.length > 0
-          ? parsedChapters
-          : generateDefaultChapters(5)
-
-        const rows = chaptersToSave.map((ch) => ({
-          book_id: newBook.id,
-          user_id: user.id,
-          chapter_index: ch.index,
-          title: ch.title,
-          summary: '',
-          notes: '',
-          highlight: '',
-        }))
-        await supabase.from('chapters').insert(rows)
+      // 챕터 생성: TOC가 있을 때만 파싱해서 생성
+      if (newBook?.id && toc) {
+        const parsedChapters = parseToc(toc)
+        if (parsedChapters.length > 0) {
+          const rows = parsedChapters.map((ch) => ({
+            book_id: newBook.id,
+            user_id: user.id,
+            chapter_index: ch.index,
+            title: ch.title,
+            summary: '',
+            notes: '',
+            highlight: '',
+          }))
+          await supabase.from('chapters').insert(rows)
+        }
       }
 
       onBookAdded?.()

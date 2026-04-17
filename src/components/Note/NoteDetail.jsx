@@ -15,7 +15,7 @@ export default function NoteDetail() {
   const navigate = useNavigate()
   const { fetchBookById, updateBook } = useBooks()
   const { chapters, loading: chaptersLoading, upsertChapter, addChapter, bulkAddChapters, renameChapter, deleteChapter, initializeChapters } = useChapters(id)
-  const { highlights, loading: highlightsLoading, addHighlight, deleteHighlight } = useHighlights(id)
+  const { highlights, loading: highlightsLoading, addHighlight, deleteHighlight, uploadImage } = useHighlights(id)
 
   const [book, setBook] = useState(null)
   const [bookLoading, setBookLoading] = useState(true)
@@ -91,6 +91,7 @@ export default function NoteDetail() {
             highlights={highlights}
             onAdd={addHighlight}
             onDelete={deleteHighlight}
+            onUploadImage={uploadImage}
             loading={highlightsLoading}
           />
         )}

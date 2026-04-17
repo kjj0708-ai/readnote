@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 import SearchModal from '../Search/SearchModal'
 
 export default function Header({ onBookAdded, addBook }) {
@@ -8,10 +9,80 @@ export default function Header({ onBookAdded, addBook }) {
   const navigate = useNavigate()
   const [showSearch, setShowSearch] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const importRef = useRef(null)
 
   const handleSignOut = async () => {
     await signOut()
     navigate('/login')
+  }
+
+  const handleExport = async () => {
+    if (!user) return
+    setExporting(true)
+    try {
+      const [{ data: books }, { data: chapters }, { data: highlights }] = await Promise.all([
+        supabase.from('books').select('*').eq('user_id', user.id),
+        supabase.from('chapters').select('*').eq('user_id', user.id),
+        supabase.from('highlights').select('*').eq('user_id', user.id),
+      ])
+      const payload = { exported_at: new Date().toISOString(), books: books || [], chapters: chapters || [], highlights: highlights || [] }
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `readnote_${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert('내보내기 실패: ' + err.message)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0]
+    if (!file || !user) return
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      const bookIdMap = {}
+
+      for (const book of (data.books || [])) {
+        const { id: oldId, user_id, created_at, updated_at, ...bookData } = book
+        const { data: newBook } = await supabase
+          .from('books')
+          .insert([{ ...bookData, user_id: user.id }])
+          .select()
+          .single()
+        if (newBook) bookIdMap[oldId] = newBook.id
+      }
+
+      const chapterRows = (data.chapters || [])
+        .filter(c => bookIdMap[c.book_id])
+        .map(({ id, user_id, book_id, updated_at, ...rest }) => ({
+          ...rest, book_id: bookIdMap[book_id], user_id: user.id,
+        }))
+      if (chapterRows.length > 0) await supabase.from('chapters').insert(chapterRows)
+
+      const highlightRows = (data.highlights || [])
+        .filter(h => bookIdMap[h.book_id])
+        .map(({ id, user_id, book_id, created_at, ...rest }) => ({
+          ...rest, book_id: bookIdMap[book_id], user_id: user.id,
+        }))
+      if (highlightRows.length > 0) await supabase.from('highlights').insert(highlightRows)
+
+      onBookAdded?.()
+      alert(`가져오기 완료! 책 ${Object.keys(bookIdMap).length}권이 추가되었습니다.`)
+    } catch (err) {
+      alert('가져오기 실패: ' + err.message)
+    } finally {
+      setImporting(false)
+      e.target.value = ''
+    }
   }
 
   return (
@@ -33,10 +104,48 @@ export default function Header({ onBookAdded, addBook }) {
               >
                 ReadNote
               </span>
+              <span className="hidden sm:inline text-xs font-noto" style={{ color: 'rgba(200,160,80,0.45)' }}>
+                만든이: 초실행관
+              </span>
             </Link>
 
             {/* 우측 액션 */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* JSON 내보내기 */}
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                title="JSON으로 내보내기"
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-noto transition-all duration-200"
+                style={{
+                  background: 'rgba(180,120,60,0.12)',
+                  color: 'rgba(200,160,80,0.7)',
+                  border: '1px solid rgba(180,120,60,0.2)',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,120,60,0.22)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,120,60,0.12)'}
+              >
+                {exporting ? '...' : '↓ 내보내기'}
+              </button>
+
+              {/* JSON 불러오기 */}
+              <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+              <button
+                onClick={() => importRef.current?.click()}
+                disabled={importing}
+                title="JSON 불러오기"
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-noto transition-all duration-200"
+                style={{
+                  background: 'rgba(180,120,60,0.12)',
+                  color: 'rgba(200,160,80,0.7)',
+                  border: '1px solid rgba(180,120,60,0.2)',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,120,60,0.22)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,120,60,0.12)'}
+              >
+                {importing ? '...' : '↑ 불러오기'}
+              </button>
+
               <button
                 onClick={() => setShowSearch(true)}
                 className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-noto font-medium transition-all duration-200"

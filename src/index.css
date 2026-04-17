@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    font-family: 'Noto Serif KR', serif;
+    font-family: 'Noto Sans KR', sans-serif;
   }
 
   body {
@@ -22,11 +22,11 @@
   }
 
   .font-playfair {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Noto Sans KR', sans-serif;
   }
 
   .font-noto {
-    font-family: 'Noto Serif KR', serif;
+    font-family: 'Noto Sans KR', sans-serif;
   }
 }
 
