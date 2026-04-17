@@ -111,40 +111,7 @@ export default function Header({ onBookAdded, addBook }) {
 
             {/* 우측 액션 */}
             <div className="flex items-center gap-2">
-              {/* JSON 내보내기 */}
-              <button
-                onClick={handleExport}
-                disabled={exporting}
-                title="JSON으로 내보내기"
-                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-noto transition-all duration-200"
-                style={{
-                  background: 'rgba(180,120,60,0.12)',
-                  color: 'rgba(200,160,80,0.7)',
-                  border: '1px solid rgba(180,120,60,0.2)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,120,60,0.22)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,120,60,0.12)'}
-              >
-                {exporting ? '...' : '↓ 내보내기'}
-              </button>
-
-              {/* JSON 불러오기 */}
               <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-              <button
-                onClick={() => importRef.current?.click()}
-                disabled={importing}
-                title="JSON 불러오기"
-                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-noto transition-all duration-200"
-                style={{
-                  background: 'rgba(180,120,60,0.12)',
-                  color: 'rgba(200,160,80,0.7)',
-                  border: '1px solid rgba(180,120,60,0.2)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,120,60,0.22)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,120,60,0.12)'}
-              >
-                {importing ? '...' : '↑ 불러오기'}
-              </button>
 
               <button
                 onClick={() => setShowSearch(true)}
@@ -188,6 +155,26 @@ export default function Header({ onBookAdded, addBook }) {
                           {user.email}
                         </p>
                       </div>
+                      <button
+                        onClick={() => { handleExport(); setShowUserMenu(false) }}
+                        disabled={exporting}
+                        className="w-full text-left px-4 py-2.5 text-sm font-noto transition-colors"
+                        style={{ color: 'rgba(200,160,80,0.7)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,100,30,0.1)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        {exporting ? '내보내는 중...' : '↓ JSON 내보내기'}
+                      </button>
+                      <button
+                        onClick={() => { importRef.current?.click(); setShowUserMenu(false) }}
+                        disabled={importing}
+                        className="w-full text-left px-4 py-2.5 text-sm font-noto transition-colors"
+                        style={{ color: 'rgba(200,160,80,0.7)', borderBottom: '1px solid rgba(180,120,60,0.1)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(180,100,30,0.1)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        {importing ? '가져오는 중...' : '↑ JSON 불러오기'}
+                      </button>
                       <button
                         onClick={handleSignOut}
                         className="w-full text-left px-4 py-2.5 text-sm font-noto transition-colors"
