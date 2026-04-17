@@ -9,14 +9,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // 현재 세션 가져오기
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    // 인증 상태 변경 구독
+    // onAuthStateChange가 초기화 시 INITIAL_SESSION 이벤트를 즉시 발생시킴
+    // getSession() 별도 호출 시 URL 해시 처리 전에 null 반환하는 race condition 발생
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session)
@@ -51,7 +45,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/readnote/`,
+        redirectTo: window.location.origin + import.meta.env.BASE_URL,
       },
     })
     return { data, error }

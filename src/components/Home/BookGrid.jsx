@@ -65,8 +65,8 @@ export default function BookGrid({ books, loading, onUpdate, onDelete }) {
         <div key={rowIdx} className="relative">
           {/* 책들 */}
           <div
-            className="grid gap-3 px-6 pt-6 pb-3"
-            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}
+            className="grid gap-2 px-3 pt-2 pb-1"
+            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))' }}
           >
             {rowBooks.map(book => (
               <BookCard key={book.id} book={book} onUpdate={onUpdate} onDelete={onDelete} />
@@ -74,7 +74,7 @@ export default function BookGrid({ books, loading, onUpdate, onDelete }) {
           </div>
 
           {/* 나무 선반 판자 */}
-          <div className="mx-2 relative" style={{ height: '18px' }}>
+          <div className="mx-2 relative" style={{ height: '14px' }}>
             {/* 선반 상단 하이라이트 */}
             <div
               className="absolute top-0 left-0 right-0 h-px"

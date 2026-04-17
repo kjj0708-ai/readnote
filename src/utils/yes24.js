@@ -9,19 +9,28 @@
 
 const AFFILIATE_URL = import.meta.env.VITE_YES24_AFFILIATE_URL || ''
 
+function isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+}
+
 export function getYes24Url(book) {
   const isbn = book.isbn13 || book.isbn
   const goodsId = book.yes24_id
+  const mobile = isMobile()
 
   if (goodsId) {
-    // ✅ 직접 상품 페이지
-    return `https://www.yes24.com/Product/Goods/${goodsId}`
+    return mobile
+      ? `https://m.yes24.com/Goods/Detail/${goodsId}`
+      : `https://www.yes24.com/Product/Goods/${goodsId}`
   }
   if (isbn) {
-    // ISBN 검색 (결과 1건만 나옴)
-    return `https://www.yes24.com/Product/Search?query=${encodeURIComponent(isbn)}&domain=BOOK`
+    return mobile
+      ? `https://m.yes24.com/Search/Result?query=${encodeURIComponent(isbn)}&domain=BOOK`
+      : `https://www.yes24.com/Product/Search?query=${encodeURIComponent(isbn)}&domain=BOOK`
   }
-  return `https://www.yes24.com/Product/Search?query=${encodeURIComponent(book.title)}&domain=BOOK`
+  return mobile
+    ? `https://m.yes24.com/Search/Result?query=${encodeURIComponent(book.title)}&domain=BOOK`
+    : `https://www.yes24.com/Product/Search?query=${encodeURIComponent(book.title)}&domain=BOOK`
 }
 
 /**
