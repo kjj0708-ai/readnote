@@ -142,7 +142,7 @@ export default function CalendarView({ books }) {
                         title={book.title}
                         onClick={() => navigate(`/book/${book.id}`)}
                         className="rounded cursor-pointer hover:scale-110 transition-transform"
-                        style={{ width: '20px', height: '28px', objectFit: 'cover' }}
+                        style={{ width: '30px', height: '42px', objectFit: 'cover' }}
                         onError={e => { e.target.style.display = 'none' }}
                       />
                     ))}

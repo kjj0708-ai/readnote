@@ -104,7 +104,7 @@ export default function Header({ onBookAdded, addBook }) {
               >
                 ReadNote
               </span>
-              <span className="hidden sm:inline text-xs font-noto" style={{ color: 'rgba(200,160,80,0.45)' }}>
+              <span className="text-xs font-noto" style={{ color: 'rgba(200,160,80,0.45)' }}>
                 만든이: 초실행관
               </span>
             </Link>
