@@ -51,7 +51,14 @@ function PostCard({ post, onDelete, canDelete }) {
           >
             <p className="font-noto text-sm font-medium" style={{ color: '#F0D5A0' }}>{post.title}</p>
           </button>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            {post.type === 'review' && post.rating > 0 && (
+              <span className="flex gap-0.5">
+                {[1,2,3,4,5].map(i => (
+                  <span key={i} className="text-xs" style={{ color: i <= post.rating ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}>★</span>
+                ))}
+              </span>
+            )}
             <span className="font-noto text-xs" style={{ color: 'rgba(200,160,80,0.35)' }}>
               {post.author_email?.split('@')[0]}
             </span>
@@ -86,6 +93,8 @@ function WriteForm({ onSubmit, isAdmin }) {
   const [type, setType] = useState(isAdmin ? 'notice' : 'review')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -98,12 +107,13 @@ function WriteForm({ onSubmit, isAdmin }) {
     if (!title.trim() || !content.trim()) return
     setSaving(true)
     setError('')
-    const result = await onSubmit({ type, title: title.trim(), content: content.trim() })
+    const result = await onSubmit({ type, title: title.trim(), content: content.trim(), rating: type === 'review' ? rating : null })
     if (result?.error) {
       setError(typeof result.error === 'string' ? result.error : result.error.message || '등록 실패')
     } else {
       setTitle('')
       setContent('')
+      setRating(0)
     }
     setSaving(false)
   }
@@ -148,6 +158,27 @@ function WriteForm({ onSubmit, isAdmin }) {
         className="w-full px-3 py-2 rounded-lg text-sm font-noto focus:outline-none resize-none"
         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(180,120,60,0.2)', color: '#F0D5A0' }}
       />
+      {type === 'review' && (
+        <div className="flex items-center gap-2">
+          <span className="font-noto text-xs" style={{ color: 'rgba(200,160,80,0.5)' }}>별점</span>
+          <div className="flex gap-1">
+            {[1,2,3,4,5].map(i => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setRating(rating === i ? 0 : i)}
+                onMouseEnter={() => setHoverRating(i)}
+                onMouseLeave={() => setHoverRating(0)}
+                className="text-xl transition-transform hover:scale-110"
+                style={{ color: i <= (hoverRating || rating) ? '#F59E0B' : 'rgba(255,255,255,0.15)' }}
+              >★</button>
+            ))}
+          </div>
+          {rating > 0 && (
+            <span className="font-noto text-xs" style={{ color: 'rgba(200,160,80,0.4)' }}>{rating}점</span>
+          )}
+        </div>
+      )}
       {error && (
         <p className="text-xs font-noto px-1" style={{ color: '#F87171' }}>
           오류: {error}

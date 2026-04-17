@@ -19,11 +19,11 @@ export function usePosts() {
 
   useEffect(() => { fetchPosts() }, [fetchPosts])
 
-  const addPost = async ({ type, title, content }) => {
+  const addPost = async ({ type, title, content, rating = null }) => {
     if (!user) return { error: '로그인이 필요합니다.' }
     const { data, error } = await supabase
       .from('posts')
-      .insert([{ user_id: user.id, author_email: user.email, type, title, content }])
+      .insert([{ user_id: user.id, author_email: user.email, type, title, content, rating }])
       .select()
       .single()
     if (!error) setPosts(prev => [data, ...prev])
