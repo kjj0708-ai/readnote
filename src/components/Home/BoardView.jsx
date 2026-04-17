@@ -87,6 +87,7 @@ function WriteForm({ onSubmit, isAdmin }) {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   const options = isAdmin
     ? [{ value: 'notice', label: '공지사항' }, ...TYPE_OPTIONS]
@@ -96,9 +97,14 @@ function WriteForm({ onSubmit, isAdmin }) {
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
     setSaving(true)
-    await onSubmit({ type, title: title.trim(), content: content.trim() })
-    setTitle('')
-    setContent('')
+    setError('')
+    const result = await onSubmit({ type, title: title.trim(), content: content.trim() })
+    if (result?.error) {
+      setError(typeof result.error === 'string' ? result.error : result.error.message || '등록 실패')
+    } else {
+      setTitle('')
+      setContent('')
+    }
     setSaving(false)
   }
 
@@ -142,6 +148,11 @@ function WriteForm({ onSubmit, isAdmin }) {
         className="w-full px-3 py-2 rounded-lg text-sm font-noto focus:outline-none resize-none"
         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(180,120,60,0.2)', color: '#F0D5A0' }}
       />
+      {error && (
+        <p className="text-xs font-noto px-1" style={{ color: '#F87171' }}>
+          오류: {error}
+        </p>
+      )}
       <div className="flex justify-end">
         <button
           type="submit"
@@ -170,8 +181,9 @@ export default function BoardView() {
   const userPosts = posts.filter(p => p.type !== 'notice')
 
   const handleAdd = async (data) => {
-    const { error } = await addPost(data)
-    if (!error) setShowForm(false)
+    const result = await addPost(data)
+    if (!result?.error) setShowForm(false)
+    return result
   }
 
   return (
