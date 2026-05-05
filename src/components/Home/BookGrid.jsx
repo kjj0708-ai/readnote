@@ -2,7 +2,7 @@ import { useState } from 'react'
 import BookCard from './BookCard'
 import StatusFilter from './StatusFilter'
 
-const SHELF_SIZE = 8 // 선반 하나당 책 수 (데스크톱 기준)
+const SHELF_SIZE = 4 // 선반 하나당 책 수
 
 export default function BookGrid({ books, loading, onUpdate, onDelete }) {
   const [filter, setFilter] = useState('all')
